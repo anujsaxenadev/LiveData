@@ -1,7 +1,8 @@
-package com.wordpress.anujsaxenadev.live_data.lib
+package com.wordpress.anujsaxenadev.live_data.lib.impl
 
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.wordpress.anujsaxenadev.live_data.lib.LiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -9,7 +10,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
-class LiveDataImpl<T> : DefaultLifecycleObserver, LiveData<T>{
+class LiveDataImpl<T> : DefaultLifecycleObserver, LiveData<T> {
     private var mValue: T? = null
     private var observeForeverObserverList: ArrayList<LiveDataObserver<T>> = ArrayList()
     private var lifecycleBoundObserversList: ArrayList<LiveDataObserver<T>> = ArrayList()
