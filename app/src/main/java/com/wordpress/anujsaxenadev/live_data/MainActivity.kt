@@ -15,7 +15,9 @@ import com.wordpress.anujsaxenadev.live_data.ui.theme.LiveDataTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
+
             LiveDataTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(

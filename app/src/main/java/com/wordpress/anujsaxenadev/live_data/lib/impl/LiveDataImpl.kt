@@ -1,8 +1,9 @@
 package com.wordpress.anujsaxenadev.live_data.lib.impl
 
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.wordpress.anujsaxenadev.live_data.lib.LiveData
+import com.wordpress.anujsaxenadev.live_data.lib.observers.LiveDataLifeCycleObserver
+import com.wordpress.anujsaxenadev.live_data.lib.observers.LiveDataObserver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -10,70 +11,55 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
-class LiveDataImpl<T> : DefaultLifecycleObserver, LiveData<T> {
-    private var mValue: T? = null
-    private var observeForeverObserverList: ArrayList<LiveDataObserver<T>> = ArrayList()
-    private var lifecycleBoundObserversList: ArrayList<LiveDataObserver<T>> = ArrayList()
+class LiveDataImpl<T>: LiveData<T> {
+    private var value: T? = null
+    private var observersList: ArrayList<LiveDataObserver<T>> = ArrayList()
 
     override fun setValue(value: T) {
-        mValue = value
-        fireObserver(mValue)
+        this.value = value
+        fireObserver(this.value)
     }
 
     override fun postValue(value: T) {
-        mValue = value
-
-        CoroutineScope(Dispatchers.Default).launch {
-            fireObserversOnBackgroundThread(value)
-        }
+        this.value = value
+        fireObserversOnBackgroundThread(value)
     }
 
     override fun getValue(): T? {
-        return mValue
+        return value
     }
 
-    override fun observeForever(observer: LiveDataObserver<T>) {
-        observeForeverObserverList.add(observer)
-    }
-
-    override fun observe(owner: LifecycleOwner, observer: LiveDataObserver<T>) {
-        val lifecycleObserver = LiveDataLifeCycleObserver()
-        observer.lifecycleObserver = lifecycleObserver
-        owner.lifecycle.addObserver(lifecycleObserver)
-        lifecycleBoundObserversList.add(observer)
+    override fun observe(observer: LiveDataObserver<T>, owner: LifecycleOwner?) {
+        owner?.let {
+            observer.lifecycleObserver = LiveDataLifeCycleObserver()
+            owner.lifecycle.addObserver(observer.lifecycleObserver!!)
+        }
+        observersList.add(observer)
     }
 
     override fun removeObserver(observer: LiveDataObserver<T>) {
-        when(observer.type){
-            ObserverType.ForeverObserver -> {
-                removeObserverFromList(lifecycleBoundObserversList, observer)
-            }
-            ObserverType.LifecycleBoundObserver -> {
-                removeObserverFromList(observeForeverObserverList, observer)
-            }
-        }
+        removeObserverFromList(observer)
     }
 
-    private suspend fun fireObserversOnBackgroundThread(value: T){
-        flow {
-            emit(value)
-        }
-            .flowOn(Dispatchers.Default)
-            .collectLatest { value ->
-                CoroutineScope(Dispatchers.Main).launch {
+    private fun fireObserversOnBackgroundThread(value: T){
+        CoroutineScope(Dispatchers.Main).launch {
+            flow {
+                emit(value)
+            }
+                .flowOn(Dispatchers.Default)
+                .collectLatest { value ->
                     fireObserver(value)
                 }
-            }
+        }
     }
 
     private fun fireObserver(mValue: T?){
-        postDataThroughObservers(observeForeverObserverList, mValue)
-        postDataThroughObservers(lifecycleBoundObserversList, mValue)
+        postDataThroughObservers(observersList, mValue)
     }
 
     private fun postDataThroughObservers(observersList: ArrayList<LiveDataObserver<T>>, mValue: T?) {
         for (observer in observersList) {
-            if(observer.type == ObserverType.LifecycleBoundObserver){
+            if(observer.lifecycleObserver != null){
                 observer.lifecycleObserver?.isLifeCyclePaused()?.let {
                     if(!it){
                         observer.observer(mValue)
@@ -86,12 +72,13 @@ class LiveDataImpl<T> : DefaultLifecycleObserver, LiveData<T> {
         }
     }
 
-    private fun removeObserverFromList(list: ArrayList<LiveDataObserver<T>>, targetObserver: LiveDataObserver<T>){
-        val observerIterator = list.iterator()
-        while (observerIterator.hasNext()) {
-            val observer = observerIterator.next()
-            if(observer == targetObserver){
-                observerIterator.remove()
+    private fun removeObserverFromList(targetObserver: LiveDataObserver<T>){
+        observersList.iterator().apply {
+            while (hasNext()) {
+                val observer = next()
+                if(observer == targetObserver){
+                    remove()
+                }
             }
         }
     }

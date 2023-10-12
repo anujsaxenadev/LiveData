@@ -1,4 +1,4 @@
-package com.wordpress.anujsaxenadev.live_data.lib.impl
+package com.wordpress.anujsaxenadev.live_data.lib.observers
 
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
