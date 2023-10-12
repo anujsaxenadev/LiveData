@@ -1,9 +1,9 @@
-package com.wordpress.anujsaxenadev.live_data.lib.impl
+package com.wordpress.anujsaxenadev.customlivedata.lib.impl
 
 import androidx.lifecycle.LifecycleOwner
-import com.wordpress.anujsaxenadev.live_data.lib.LiveData
-import com.wordpress.anujsaxenadev.live_data.lib.observers.LiveDataLifeCycleObserver
-import com.wordpress.anujsaxenadev.live_data.lib.observers.LiveDataObserver
+import com.wordpress.anujsaxenadev.customlivedata.lib.LiveDataContract
+import com.wordpress.anujsaxenadev.customlivedata.lib.observers.LiveDataLifeCycleObserver
+import com.wordpress.anujsaxenadev.customlivedata.lib.observers.LiveDataObserver
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
-class LiveDataImpl<T>: LiveData<T> {
+class LiveData<T>: LiveDataContract<T> {
     private var value: T? = null
     private var onError : ((Throwable) -> Unit)? = null
     private var observersList: ArrayList<LiveDataObserver<T>> = ArrayList()

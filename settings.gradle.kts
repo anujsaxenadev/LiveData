@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "LiveData"
 include(":app")
- 
+include(":CustomLiveData")
