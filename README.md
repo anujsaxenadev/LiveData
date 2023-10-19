@@ -1,2 +1,2 @@
 # CustomLiveData-Android
-Bare Minimum Implementation of Android LiveData
+Custom Live Data Implementation.
